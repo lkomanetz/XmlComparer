@@ -10,29 +10,35 @@ namespace XmlComparer.Tests {
 
 		[TestMethod]
 		public void WhenXmlIsEqualComparerSucceeds() {
-			XmlDocument[] xmlDocs = CreateDocuments();
+			XmlDocument[] xmlDocs = new XmlDocument[2];
+			xmlDocs[0] = new XmlDocument();
+			xmlDocs[0].LoadXml(@"<root><child><grandchild>hello</grandchild></child></root>");
+			xmlDocs[1] = new XmlDocument();
+			xmlDocs[1].LoadXml(@"<root><child><grandchild>hello</grandchild></child></root>");
+
 			Assert.IsTrue(XmlComparer.AreEqual(xmlDocs[0], xmlDocs[0]));
 		}
 
 		[TestMethod]
 		public void WhenXmlIsNotEqualComparerFails() {
-			XmlDocument[] xmlDocs = CreateDocuments();
+			XmlDocument[] xmlDocs = new XmlDocument[2];
+			xmlDocs[0] = new XmlDocument();
+			xmlDocs[0].LoadXml(@"<root><child><grandchild>hello</grandchild></child></root>");
+			xmlDocs[1] = new XmlDocument();
+			xmlDocs[1].LoadXml(@"<root<child>hello</child></root>");
 			Assert.IsFalse(XmlComparer.AreEqual(xmlDocs[0], xmlDocs[1]));
 		}
 
-		private XmlDocument[] CreateDocuments() {
+		[TestMethod]
+		public void WhenXmlStructureIsEqualButValuesDifferentComparerFails() {
 			XmlDocument[] xmlDocs = new XmlDocument[2];
 			xmlDocs[0] = new XmlDocument();
+			xmlDocs[0].LoadXml(@"<root><child><grandchild>hello</grandchild></child></root>");
 			xmlDocs[1] = new XmlDocument();
-			string xmlStringA = @"<root><child><grandchild>hello</grandchild></child></root>";
-			string xmlStringB = @"<root><child>hello</child></root>";
+			xmlDocs[1].LoadXml(@"<root><child>hello<grandchild></grandchild></child></root>");
 
-			xmlDocs[0].LoadXml(xmlStringA);
-			xmlDocs[1].LoadXml(xmlStringB);
-
-			return xmlDocs;
+			Assert.IsFalse(XmlComparer.AreEqual(xmlDocs[0], xmlDocs[1]));
 		}
-
 	}
 
 }

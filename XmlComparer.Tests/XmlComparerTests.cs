@@ -17,7 +17,7 @@ namespace XmlComparer.Tests {
 			xmlDocs[1] = new XmlDocument();
 			xmlDocs[1].LoadXml(@"<root><child><grandchild>hello</grandchild></child></root>");
 
-			Assert.IsTrue(comparer.AreEqual(xmlDocs[0], xmlDocs[0]));
+			Assert.IsTrue(comparer.AreEqual(xmlDocs[0], xmlDocs[1]));
 		}
 
 		[TestMethod]
@@ -160,6 +160,25 @@ namespace XmlComparer.Tests {
 			string xmlB = "<root><child><grandchild>hello</grandchild></child></root>";
 
 			Assert.IsTrue(new XmlComparer().AreEqual(xmlA, xmlB));
+		}
+
+		[TestMethod]
+		public void WhenXmlContainsNestedGroupsValidationPasses() {
+			string xml = @"
+				<root>
+					<children>
+						<child name='John'></child>
+						<child name='Joe'></child>
+						<child name='Phil'>
+							<grandchildren>
+								<grandchild name='Jake'></grandchild>
+								<grandchild name='Jack'></grandchild>
+							</grandchildren>
+						</child>
+					</children>
+				</root>";
+
+			Assert.IsTrue(new XmlComparer().AreEqual(xml, xml));
 		}
 	}
 

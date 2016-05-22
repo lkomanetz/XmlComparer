@@ -142,7 +142,10 @@ namespace XmlComparer {
 			return objA == objB;
 		}
 
-		private bool AreAttributesTheSame(XmlAttributeCollection collectionA, XmlAttributeCollection collectionB) {
+		private bool AreAttributesTheSame(
+			XmlAttributeCollection collectionA,
+			XmlAttributeCollection collectionB
+		) {
 			if ((collectionA == null && collectionB != null) ||
 				(collectionA != null && collectionB == null)) {
 

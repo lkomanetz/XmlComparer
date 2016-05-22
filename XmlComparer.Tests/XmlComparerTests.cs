@@ -154,6 +154,13 @@ namespace XmlComparer.Tests {
 			Assert.IsFalse(comparer.AreEqual(xmlDocs[0], xmlDocs[1]));
 		}
 
+		[TestMethod]
+		public void WhenComparerIsPassedStringsItWorks() {
+			string xmlA = "<root><child><grandchild>hello</grandchild></child></root>";
+			string xmlB = "<root><child><grandchild>hello</grandchild></child></root>";
+
+			Assert.IsTrue(new XmlComparer().AreEqual(xmlA, xmlB));
+		}
 	}
 
 }

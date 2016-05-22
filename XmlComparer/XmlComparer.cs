@@ -9,8 +9,11 @@ using System.Threading.Tasks;
 namespace XmlComparer {
 
 	public class XmlComparer {
-		private Dictionary<string, string> _attributeStructure = new Dictionary<string,string>();
-		private Dictionary<Guid, bool> _results = new Dictionary<Guid, bool>();
+		private Dictionary<Guid, bool> _results;
+
+		public XmlComparer() {
+			_results = new Dictionary<Guid, bool>();
+		}
 
 		public bool AreEqual(XmlDocument xmlObjA, XmlDocument xmlObjB) {
 			Compare(xmlObjA.FirstChild, xmlObjB.FirstChild);
@@ -25,11 +28,11 @@ namespace XmlComparer {
 		}
 
 		private void Compare(XmlNode nodeA, XmlNode nodeB) {
-			bool areTheSame = true;
 			if ((nodeA == null && nodeB != null) ||
 				(nodeA != null && nodeB == null)) {
 
-				areTheSame = false;
+				_results.Add(Guid.NewGuid(), false);
+				return;
 			}
 
 			if (nodeA.HasChildNodes && nodeB.HasChildNodes) {
@@ -40,8 +43,16 @@ namespace XmlComparer {
 				Compare(nodeA.NextSibling, nodeB.NextSibling);
 			}
 
+			if ((nodeA.NextSibling == null && nodeB.NextSibling != null) ||
+				(nodeA.NextSibling != null && nodeB.NextSibling == null)) {
+
+				_results.Add(Guid.NewGuid(), false);
+				return;
+			}
+
 			if (!nodeA.Name.Equals(nodeB.Name)) {
-				areTheSame = false;
+				_results.Add(Guid.NewGuid(), false);
+				return;
 			}
 
 			bool nodeAHasAttributes = HasAttributes(nodeA);
@@ -51,21 +62,28 @@ namespace XmlComparer {
 				bool attributesAreTheSame = AreAttributesTheSame(nodeA.Attributes, nodeB.Attributes);
 
 				if (!attributesAreTheSame) {
-					areTheSame = false;
+					_results.Add(Guid.NewGuid(), false);
+					return;
 				}
 			}
 
 			if ((nodeAHasAttributes && !nodeBHasAttributes) ||
 				(!nodeAHasAttributes && nodeBHasAttributes)) {
 
-				areTheSame = false;
+				_results.Add(Guid.NewGuid(), false);
+				return;
 			}
 
 			if (nodeA.Value != null || nodeB.Value != null) {
-				areTheSame = AreValuesTheSame(nodeA.Value, nodeB.Value);
+				bool areTheSame = AreValuesTheSame(nodeA.Value, nodeB.Value);
+
+				if (!areTheSame) {
+					_results.Add(Guid.NewGuid(), false);
+					return;
+				}
 			}
 
-			_results.Add(Guid.NewGuid(), areTheSame);
+			_results.Add(Guid.NewGuid(), true);
 		}
 
 		private bool HasAttributes(XmlNode node) {

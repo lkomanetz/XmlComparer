@@ -84,6 +84,17 @@ namespace XmlComparer.Tests {
 		}
 
 		[TestMethod]
+		public void WhenXmlIsMissingGroupComparerFails() {
+			XmlDocument[] xmlDocs = new XmlDocument[2];
+			xmlDocs[0] = new XmlDocument();
+			xmlDocs[0].LoadXml(@"<root><child><grandchild></grandchild></child><child></child></root>");
+			xmlDocs[1] = new XmlDocument();
+			xmlDocs[1].LoadXml(@"<root><child><grandchild></grandchild></child></root>");
+
+			Assert.IsFalse(new XmlComparer().AreEqual(xmlDocs[0], xmlDocs[1]));
+		}
+
+		[TestMethod]
 		public void WhenXmlHasGroupsAndAreTheSameComparerSucceeds() {
 			XmlComparer comparer = new XmlComparer();
 			XmlDocument[] xmlDocs = new XmlDocument[2];

@@ -20,12 +20,23 @@ namespace XmlComparer.Tests {
 		}
 
 		[TestMethod]
+		public void WhenAttributesAreDifferentComparerFails() {
+			XmlDocument[] xmlDocs = new XmlDocument[2];
+			xmlDocs[0] = new XmlDocument();
+			xmlDocs[0].LoadXml(@"<root><child><grandchild>hello</grandchild></child></root>");
+			xmlDocs[1] = new XmlDocument();
+			xmlDocs[1].LoadXml(@"<root><child test='1'><grandchild>hello</grandchild></child></root>");
+
+			Assert.IsFalse(XmlComparer.AreEqual(xmlDocs[0], xmlDocs[1]));
+		}
+
+		[TestMethod]
 		public void WhenXmlIsNotEqualComparerFails() {
 			XmlDocument[] xmlDocs = new XmlDocument[2];
 			xmlDocs[0] = new XmlDocument();
 			xmlDocs[0].LoadXml(@"<root><child><grandchild>hello</grandchild></child></root>");
 			xmlDocs[1] = new XmlDocument();
-			xmlDocs[1].LoadXml(@"<root<child>hello</child></root>");
+			xmlDocs[1].LoadXml(@"<root><child>hello</child></root>");
 			Assert.IsFalse(XmlComparer.AreEqual(xmlDocs[0], xmlDocs[1]));
 		}
 

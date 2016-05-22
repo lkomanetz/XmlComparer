@@ -18,21 +18,54 @@ namespace XmlComparer {
 			BuildXmlStructure(xmlObjA.FirstChild);
 			BuildXmlStructure(xmlObjB.FirstChild);
 
-			if ((_xmlObjStructure.Count % 2) != 0) {
+			bool areTheSame = Compare(xmlObjA.FirstChild, xmlObjB.FirstChild);
+
+			return areTheSame;
+		}
+
+		private static bool Compare(XmlNode nodeA, XmlNode nodeB) {
+			if ((nodeA == null && nodeB != null) ||
+				(nodeA != null && nodeB == null)) {
+
 				return false;
 			}
 
-			_elementsPerDocument = (int)_xmlObjStructure.Count / 2;
-
-			if (AreStructuresEqual()) {
-				BuildValueStructure(xmlObjA.FirstChild);
-				BuildValueStructure(xmlObjB.FirstChild);
-
-				BuildAttributeStructure(xmlObjA.FirstChild);
-				BuildAttributeStructure(xmlObjB.FirstChild);
+			if (nodeA.HasChildNodes && nodeB.HasChildNodes) {
+				Compare(nodeA.FirstChild, nodeB.FirstChild);
 			}
 
+			if (!nodeA.Name.Equals(nodeB.Name)) {
+				return false;
+			}
 
+			if (HasAttributes(nodeA) && HasAttributes(nodeB)) {
+				if (nodeA.Attributes.Count == nodeB.Attributes.Count) {
+					for (int i = 0; i < nodeA.Attributes.Count; i++) {
+						if (!nodeA.Attributes[i].Name.Equals(nodeB.Attributes[i].Name)) {
+							return false;
+						}
+
+						if (!nodeA.Attributes[i].Value.Equals(nodeB.Attributes[i].Value)) {
+							return false;
+						}
+					}
+				}
+				else {
+					return false;
+				}
+			}
+			else {
+				return false;
+			}
+
+			return true;
+		}
+
+		private static bool HasAttributes(XmlNode node) {
+			return node.Attributes != null && node.Attributes.Count > 0;
+		}
+
+		private static bool AreAttributesTheSame(XmlAttributeCollection collectionA, XmlAttributeCollection colletionB) {
 			return false;
 		}
 

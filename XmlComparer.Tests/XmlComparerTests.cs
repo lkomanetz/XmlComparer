@@ -33,6 +33,55 @@ namespace XmlComparer.Tests {
 		}
 
 		[TestMethod]
+		public void WithMultipleAttributesThatAreEqualComparerSucceeds() {
+			string xml = @"
+				<root>
+					<parents>
+						<parent id='1' name='John'>
+							<child></child>
+						</parent>
+						<parent id='2' name='Mary'>
+							<child></child>
+							<child></child>
+						</parent>
+					</parents>
+				</root>";
+
+			Assert.IsTrue(new XmlComparer().AreEqual(xml, xml));
+		}
+
+		[TestMethod]
+		public void WhenMultipleAttributesAreDifferentComparerFails() {
+			string xmlA = @"
+				<root>
+					<parents>
+						<parent id='1' name='John'>
+							<child></child>
+						</parent>
+						<parent id='2' name='Mary'>
+							<child></child>
+							<child></child>
+						</parent>
+					</parents>
+				</root>";
+
+			string xmlB = @"
+				<root>
+					<parents>
+						<parent id='1' name='Jake'>
+							<child></child>
+						</parent>
+						<parent id='2' name='Jane'>
+							<child></child>
+							<child></child>
+						</parent>
+					</parents>
+				</root>";
+
+			Assert.IsFalse(new XmlComparer().AreEqual(xmlA, xmlB));
+		}
+
+		[TestMethod]
 		public void WithComplexStructureThatIsTheSameComparerSucceeds() {
 			string xml = @"
 				<root>

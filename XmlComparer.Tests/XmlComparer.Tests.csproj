@@ -54,6 +54,7 @@
   <ItemGroup>
     <Compile Include="XmlComparerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="XmlValidatorTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\XmlComparer\XmlComparer.csproj">

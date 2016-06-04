@@ -11,14 +11,46 @@ namespace XmlComparer.Tests {
 	public class XmlValidatorTests {
 		
 		[TestMethod]
-		public void Test() {
+		public void WhenNoGroupsExistValidatorReturnsZero() {
 			string xml = @"<root><child><grandchild>hello</grandchild></child></root>";
 			XmlValidator validator = new XmlValidator(xml);
-			var node = validator.Xml
-				.Where(x => x.Name.Equals("grandchild") && x.Value.Equals("hello"))
-				.SingleOrDefault();
 
-			Assert.IsNotNull(node);
+			Assert.IsTrue(validator.GroupNodes.Length == 0);
+		}
+
+		[TestMethod]
+		public void WhenOneGroupExistsValidatorReturnsOne() {
+			string xml = @"
+				<root>
+					<child>
+						<grandchild></grandchild>
+						<grandchild></grandchild>
+					</child>
+				</root>";
+
+			XmlValidator validator = new XmlValidator(xml);
+
+			Assert.IsTrue(validator.GroupNodes.Length == 1);
+			Assert.IsTrue(validator.GroupNodes[0] == "grandchild");
+		}
+
+		[TestMethod]
+		public void WhenMultipleGroupsExistValidatrReturnsCorrectAmount() {
+			string xml = @"
+				<root>
+					<child>
+						<grandchild></grandchild>
+						<grandchild></grandchild>
+					</child>
+					<child>
+						<grandchild></grandchild>
+						<grandchild></grandchild>
+					</child>
+				</root>";
+
+			XmlValidator validator = new XmlValidator(xml);
+			Assert.IsTrue(validator.GroupNodes.Length == 2);
+			Assert.IsTrue(validator.GroupNodes.Contains("child") && validator.GroupNodes.Contains("grandchild"));
 		}
 
 	}

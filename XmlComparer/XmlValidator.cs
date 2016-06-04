@@ -10,51 +10,83 @@ namespace XmlComparer {
 
 	public class XmlValidator {
 		private XmlDocument _xmlDoc;
-		private List<XmlNode> _flattenedXml;
+		private Dictionary<string, int> _nodeCounts;
 
 		private XmlValidator() {
 			_xmlDoc = new XmlDocument();
-			_flattenedXml = new List<XmlNode>();
+			_nodeCounts = new Dictionary<string,int>();
 		}
 
-		public XmlValidator(string xml) :
-			base() {
-
+		public XmlValidator(string xml) {
+			_xmlDoc = new XmlDocument();
+			_nodeCounts = new Dictionary<string,int>();
 			_xmlDoc.LoadXml(xml);
-			this.Flatten(_xmlDoc);
+
+			this.FindGroupNodes(_xmlDoc.FirstChild);
+			this.PopulateGroupNodesArray();
+
 		}
 
-		public XmlValidator(XmlDocument xml) :
-			base() {
-
+		public XmlValidator(XmlDocument xml) {
+			_nodeCounts = new Dictionary<string,int>();
 			_xmlDoc = xml;
-			this.Flatten(_xmlDoc.FirstChild);
+
+			this.FindGroupNodes(_xmlDoc.FirstChild);
+			this.PopulateGroupNodesArray();
 		}
 
-		public XmlValidator(XDocument xml) :
-			base() {
+		public XmlValidator(XDocument xml) {
+			_nodeCounts = new Dictionary<string,int>();
+			_xmlDoc = new XmlDocument();
 
 			using (var xmlReader = xml.CreateReader()) {
 				_xmlDoc.Load(xmlReader);
 			}
-			this.Flatten(_xmlDoc.FirstChild);
+
+			this.FindGroupNodes(_xmlDoc.FirstChild);
+			this.PopulateGroupNodesArray();
 		}
 
-		public List<XmlNode> Xml {
-			get { return _flattenedXml; }
-		}
+		public string[] GroupNodes { get; set; }
 
-		private void Flatten(XmlNode node) {
+		private void FindGroupNodes(XmlNode node) {
 			if (node == null) {
 				return;
 			}
 
+			if (node.HasChildNodes) {
+				FindGroupNodes(node.FirstChild);
+			}
+
 			if (node.NextSibling != null) {
-				Flatten(node.NextSibling);
+				FindGroupNodes(node.NextSibling);
 			}
 			
-			_flattenedXml.Add(node);
+			int count = 0;
+			_nodeCounts.TryGetValue(node.Name, out count);
+
+			if (_nodeCounts.ContainsKey(node.Name)) {
+				_nodeCounts[node.Name]++;
+			}
+			else {
+				_nodeCounts.Add(node.Name, ++count);
+			}
+
 		}
+
+		private void PopulateGroupNodesArray() {
+			var groupNodes = _nodeCounts
+				.Where(x => x.Value > 1)
+				.Select(x => x.Key)
+				.ToList();
+
+			this.GroupNodes = new string[groupNodes.Count];
+
+			for (short i = 0; i < groupNodes.Count; i++) {
+				this.GroupNodes[i] = groupNodes[i];
+			}
+		}
+
 	}
 
 }

@@ -15,7 +15,7 @@ namespace XmlComparer.Tests {
 			string xml = @"<root><child><grandchild>hello</grandchild></child></root>";
 			XmlValidator validator = new XmlValidator(xml);
 
-			Assert.IsTrue(validator.GroupNodes.Length == 0);
+			Assert.IsTrue(validator.GroupNodes.Count == 0);
 		}
 
 		[TestMethod]
@@ -30,7 +30,7 @@ namespace XmlComparer.Tests {
 
 			XmlValidator validator = new XmlValidator(xml);
 
-			Assert.IsTrue(validator.GroupNodes.Length == 1);
+			Assert.IsTrue(validator.GroupNodes.Count == 1);
 			Assert.IsTrue(validator.GroupNodes[0] == "grandchild");
 		}
 
@@ -49,10 +49,32 @@ namespace XmlComparer.Tests {
 				</root>";
 
 			XmlValidator validator = new XmlValidator(xml);
-			Assert.IsTrue(validator.GroupNodes.Length == 2);
-			Assert.IsTrue(validator.GroupNodes.Contains("child") && validator.GroupNodes.Contains("grandchild"));
+			Assert.IsTrue(validator.GroupNodes.Count == 2, "Did not find all group nodes");
+			Assert.IsTrue(
+				validator.GroupNodes.Contains("child") && validator.GroupNodes.Contains("grandchild"),
+				"Incorrect group nodes found."
+			);
 		}
 
+		[TestMethod]
+		public void WhenSameNodeIsFoundOutsideOfGroupNoGroupNodesFound() {
+			string xml = @"
+				<root>
+					<child>
+						<grandchild></grandchild>
+					</child>
+					<child>
+						<grandchild></grandchild>
+					</child>
+				</root>";
+
+			XmlValidator validator = new XmlValidator(xml);
+			Assert.IsTrue(validator.GroupNodes.Count == 1, "Did not find child to be group node.");
+			Assert.IsTrue(
+				validator.GroupNodes.Contains("child"),
+				"Validator did not find correct group nodes."
+			);
+		}
 	}
 
 }

@@ -15,39 +15,35 @@ namespace XmlComparer {
 		private XmlValidator() {
 			_xmlDoc = new XmlDocument();
 			_nodeCounts = new Dictionary<string,int>();
+			this.GroupNodes = new List<string>();
 		}
 
-		public XmlValidator(string xml) {
-			_xmlDoc = new XmlDocument();
-			_nodeCounts = new Dictionary<string,int>();
+		public XmlValidator(string xml) 
+			: this() {
+			this.GroupNodes = new List<string>();
 			_xmlDoc.LoadXml(xml);
 
 			this.FindGroupNodes(_xmlDoc.FirstChild);
-			this.PopulateGroupNodesArray();
-
 		}
 
-		public XmlValidator(XmlDocument xml) {
-			_nodeCounts = new Dictionary<string,int>();
+		public XmlValidator(XmlDocument xml) 
+			: this() {
 			_xmlDoc = xml;
 
 			this.FindGroupNodes(_xmlDoc.FirstChild);
-			this.PopulateGroupNodesArray();
 		}
 
-		public XmlValidator(XDocument xml) {
-			_nodeCounts = new Dictionary<string,int>();
-			_xmlDoc = new XmlDocument();
+		public XmlValidator(XDocument xml) 
+			: this() {
 
 			using (var xmlReader = xml.CreateReader()) {
 				_xmlDoc.Load(xmlReader);
 			}
 
 			this.FindGroupNodes(_xmlDoc.FirstChild);
-			this.PopulateGroupNodesArray();
 		}
 
-		public string[] GroupNodes { get; set; }
+		public List<string> GroupNodes { get; set; }
 
 		private void FindGroupNodes(XmlNode node) {
 			if (node == null) {
@@ -59,31 +55,16 @@ namespace XmlComparer {
 			}
 
 			if (node.NextSibling != null) {
-				FindGroupNodes(node.NextSibling);
-			}
-			
-			int count = 0;
-			_nodeCounts.TryGetValue(node.Name, out count);
+				//FindGroupNodes(node.NextSibling);
+				int count = 1;
+				_nodeCounts.TryGetValue(node.Name, out count);
 
-			if (_nodeCounts.ContainsKey(node.Name)) {
-				_nodeCounts[node.Name]++;
-			}
-			else {
-				_nodeCounts.Add(node.Name, ++count);
-			}
-
-		}
-
-		private void PopulateGroupNodesArray() {
-			var groupNodes = _nodeCounts
-				.Where(x => x.Value > 1)
-				.Select(x => x.Key)
-				.ToList();
-
-			this.GroupNodes = new string[groupNodes.Count];
-
-			for (short i = 0; i < groupNodes.Count; i++) {
-				this.GroupNodes[i] = groupNodes[i];
+				if (this.GroupNodes.Contains(node.Name)) {
+					return;
+				}
+				else {
+					this.GroupNodes.Add(node.Name);
+				}
 			}
 		}
 

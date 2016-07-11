@@ -5,27 +5,30 @@ using System.Xml.Linq;
 using System.Xml;
 using System.Text;
 using System.Threading.Tasks;
+using XmlComparer.Contracts;
 
 namespace XmlComparer {
 
 	public class XmlComparer {
-		private Dictionary<Guid, bool> _results;
+		private ComparisonResults _results;
 		private XmlDocument _xmlDocA;
 		private XmlDocument _xmlDocB;
 
 		public XmlComparer() {
-			_results = new Dictionary<Guid, bool>();
+			_results = new ComparisonResults();
 			_xmlDocA = new XmlDocument();
 			_xmlDocB = new XmlDocument();
+		}
+
+		public ComparisonResults Results {
+			get { return _results; }
 		}
 
 		public bool AreEqual(XmlDocument xmlObjA, XmlDocument xmlObjB) {
 			_xmlDocA = xmlObjA;
 			_xmlDocB = xmlObjB;
 
-			Compare(xmlObjA.FirstChild, xmlObjB.FirstChild);
 			bool areEqual = CompareEquality();
-
 			return areEqual;
 		}
 
@@ -47,8 +50,8 @@ namespace XmlComparer {
 
 		private bool CompareEquality() {
 			Compare(_xmlDocA.FirstChild, _xmlDocB.FirstChild);
-			bool isDifferent = _results.Any(kvp => kvp.Value == false);
 
+			bool isDifferent = _results.Results.Any(x => !x.AreEqual);
 			if (isDifferent) {
 				return false;
 			}
@@ -58,10 +61,15 @@ namespace XmlComparer {
 		}
 
 		private void Compare(XmlNode nodeA, XmlNode nodeB) {
+			ComparisonResult result = new ComparisonResult() {
+				Node = nodeA.Name
+			};
+
 			if ((nodeA == null && nodeB != null) ||
 				(nodeA != null && nodeB == null)) {
 
-				_results.Add(Guid.NewGuid(), false);
+				result.AreEqual = false;
+				_results.Add(result);
 				return;
 			}
 
@@ -80,16 +88,19 @@ namespace XmlComparer {
 			if ((nodeA.NextSibling == null && nodeB.NextSibling != null) ||
 				(nodeA.NextSibling != null && nodeB.NextSibling == null)) {
 
-				_results.Add(Guid.NewGuid(), false);
+				result.AreEqual = false;
+				_results.Add(result);
 				return;
 			}
 
 			if (!nodeA.Name.Equals(nodeB.Name)) {
-				_results.Add(Guid.NewGuid(), false);
+				result.AreEqual = false;
+				_results.Add(result);
 				return;
 			}
 
-			if (!CompareAttributes(nodeA, nodeB)) {
+			if (!CompareAttributes(nodeA, nodeB, ref result)) {
+				_results.Add(result);
 				return;
 			}
 
@@ -97,15 +108,17 @@ namespace XmlComparer {
 				bool areTheSame = AreValuesTheSame(nodeA.Value, nodeB.Value);
 
 				if (!areTheSame) {
-					_results.Add(Guid.NewGuid(), false);
+					result.AreEqual = false;
+					_results.Add(result);
 					return;
 				}
 			}
 
-			_results.Add(Guid.NewGuid(), true);
+			result.AreEqual = true;
+			_results.Add(result);
 		}
 
-		private bool CompareAttributes(XmlNode nodeA, XmlNode nodeB) {
+		private bool CompareAttributes(XmlNode nodeA, XmlNode nodeB, ref ComparisonResult result) {
 			bool nodeAHasAttributes = HasAttributes(nodeA);
 			bool nodeBHasAttributes = HasAttributes(nodeB);
 
@@ -113,7 +126,7 @@ namespace XmlComparer {
 				bool attributesAreTheSame = AreAttributesTheSame(nodeA.Attributes, nodeB.Attributes);
 
 				if (!attributesAreTheSame) {
-					_results.Add(Guid.NewGuid(), false);
+					result.AreEqual = false;
 					return false;
 				}
 			}
@@ -121,7 +134,7 @@ namespace XmlComparer {
 			if ((nodeAHasAttributes && !nodeBHasAttributes) ||
 				(!nodeAHasAttributes && nodeBHasAttributes)) {
 
-				_results.Add(Guid.NewGuid(), false);
+				result.AreEqual = false;
 				return false;
 			}
 

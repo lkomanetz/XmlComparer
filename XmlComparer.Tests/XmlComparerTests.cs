@@ -2,6 +2,8 @@
 using System.Xml;
 using System.Xml.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using XmlComparer.Contracts;
+using System.Text;
 
 namespace XmlComparer.Tests {
 
@@ -78,7 +80,45 @@ namespace XmlComparer.Tests {
 					</parents>
 				</root>";
 
-			Assert.IsFalse(new XmlComparer().AreEqual(xmlA, xmlB));
+			XmlComparer comparer = new XmlComparer();
+			comparer.AreEqual(xmlA, xmlB);
+			Assert.IsFalse(comparer.Results.IsSuccessful);
+		}
+
+		[TestMethod]
+		public void ComparisonResultsAreCorrect() {
+			string xmlA = @"
+				<root>
+					<parents>
+						<parent id='1' name='John'>
+							<child></child>
+						</parent>
+						<parent id='2' name='Mary'>
+							<child></child>
+							<child></child>
+						</parent>
+					</parents>
+				</root>";
+
+			string xmlB = @"
+				<root>
+					<parents>
+						<parent id='1' name='Jake'>
+							<child></child>
+						</parent>
+						<parent id='2' name='Jane'>
+							<child></child>
+							<child></child>
+						</parent>
+					</parents>
+				</root>";
+
+			XmlComparer comparer = new XmlComparer();
+			comparer.AreEqual(xmlA, xmlB);
+			AssertResults(
+				"child:Truechild:Truechild:Trueparent:Falseparent:Falseparents:Trueroot:True",
+				comparer.Results
+			);
 		}
 
 		[TestMethod]
@@ -229,6 +269,18 @@ namespace XmlComparer.Tests {
 
 			Assert.IsTrue(new XmlComparer().AreEqual(xml, xml));
 		}
+		private void AssertResults(string expectedResults, ComparisonResults actualResults) {
+			StringBuilder sb = new StringBuilder();
+
+			for (short i = 0; i < actualResults.Results.Count; i++) {
+				ComparisonResult result = actualResults.Results[i];
+				sb.AppendLine(result.Node + ":" + result.AreEqual);
+			}
+
+			string actualResultsStr = sb.ToString().Replace("\r\n", "");
+			Assert.AreEqual(expectedResults, actualResultsStr);
+		}
+
 	}
 
 }

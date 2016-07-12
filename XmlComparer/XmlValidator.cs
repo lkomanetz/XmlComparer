@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 namespace XmlComparer {
 
 	public class XmlValidator {
+
 		private XmlDocument _xmlDoc;
 		private Dictionary<string, int> _nodeCounts;
 
